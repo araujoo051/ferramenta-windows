@@ -5,7 +5,7 @@ a = Analysis(
     ['app2.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('scripts/*.bat', 'scripts'), ('icons/logo.ico', 'icons')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,5 +35,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['C:\\Users\\gabriel.araujo\\Documents\\App Limpeza\\icons\\fundatec.ico'],
 )
