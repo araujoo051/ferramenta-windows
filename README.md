@@ -40,7 +40,7 @@ pip install customtkinter pyinstaller
 ```
 No terminal:
 ```bash
-pyinstaller --onefile --windowed --icon="icons/fundatec.ico" app2.py
+pyinstaller --noconsole --onefile --add-data "scripts\\*.bat;scripts" --add-data "icons\\logo.ico;icons" app2.py
 ```
 Isso gerará um executável na pasta dist/.
 
