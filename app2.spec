@@ -5,7 +5,7 @@ a = Analysis(
     ['app2.py'],
     pathex=[],
     binaries=[],
-    datas=[('scripts/*.bat', 'scripts'), ('icons/logo.ico', 'icons')],
+    datas=[('scripts\\\\*.bat', 'scripts'), ('icons\\\\logo.ico', 'icons')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

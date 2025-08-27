@@ -39,6 +39,7 @@ class App(ctk.CTk):
         ctk.CTkButton(self.sidebar, text="Teste de Conexão", command=self.teste_rede).pack(pady=5, fill="x", padx=10)
         ctk.CTkButton(self.sidebar, text="Reset de rede", command=self.reset_rede).pack(pady=5, fill="x", padx=10)
         ctk.CTkButton(self.sidebar, text="Reparar arquivos corrompidos", command=self.reparar_corrompidos).pack(pady=5, fill="x", padx=10)
+        ctk.CTkButton(self.sidebar, text="Realizar todas tarefas em fila", command=self.executar_direto).pack(pady=5, fill="x", padx=10)
         ctk.CTkButton(self.sidebar, text="Sair", command=self.quit).pack(pady=20, fill="x", padx=10)
 
         self.content = ctk.CTkFrame(self)
@@ -266,7 +267,61 @@ class App(ctk.CTk):
         self.after(0, lambda: self.label_status.configure(text="Reparo de arquivos corrompidos finalizado!"))
         self.after(0, lambda: self.progress.set(1.0))
 
+    def executar_direto(self):
+        if not hasattr(self, 'label_status'):
+            self.label_status = ctk.CTkLabel(self.content, text="", font=ctk.CTkFont(size=14))
+            self.label_status.pack(pady=10)
+        if not hasattr(self, 'progress'):
+            self.progress = ctk.CTkProgressBar(self.content)
+            self.progress.set(0)
+            self.progress.pack(pady=10, padx=20)
+        if not hasattr(self, 'text_output'):
+            self.text_output = ctk.CTkTextbox(self.content, width=500, height=200)
+            self.text_output.pack(pady=10)
+        else:
+            self.text_output.delete("1.0", "end")
 
+        self.text_output.pack()
+        self.label_status.configure(text="Executando todas as tarefas em fila...")
+        self.progress.set(0)
+
+        thread = threading.Thread(target=self.executar_todas_tarefas)
+        thread.start()
+
+    def executar_todas_tarefas(self):
+        bat_path = resource_path("scripts/executar_fila.bat")
+
+        processo = subprocess.Popen(
+            [bat_path],
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        )
+
+        for linha in processo.stdout:
+            linha = linha.strip()
+            print(f"[FILA] {linha}")
+
+            # Atualiza a saída no TextBox
+            self.after(0, lambda l=linha: self.text_output.insert("end", l + "\n"))
+            self.after(0, lambda: self.text_output.see("end"))
+
+            # Interpreta progresso no formato [n] Mensagem
+            if linha.startswith("[") and "]" in linha:
+                try:
+                    progresso_str = linha.split("]")[0].strip("[")
+                    progresso = int(progresso_str)
+                    status_msg = linha.split("]")[1].strip()
+                    self.after(0, lambda p=progresso / 100: self.progress.set(p))
+                    self.after(0, lambda msg=status_msg: self.label_status.configure(text=msg))
+                except Exception:
+                    pass
+
+        processo.stdout.close()            
+        processo.wait()
+        self.after(0, lambda: self.label_status.configure(text="Todas as tarefas foram concluídas!"))
+        self.after(0, lambda: self.progress.set(1.0))
 
 
 if __name__ == "__main__":
